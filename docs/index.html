@@ -26,11 +26,22 @@ a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-h)}
 h1{font-size:clamp(32px,5vw,52px);font-weight:700;letter-spacing:-.035em;line-height:1.1;margin-bottom:20px}
 h1 em{font-style:normal;background:linear-gradient(135deg,#d4a574,#e8c9a0,#d4a574);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s ease-in-out infinite}
 @keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-.hero>p{font-size:18px;color:var(--t2);max-width:480px;margin:0 auto 36px;line-height:1.6}
-.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:var(--rs);font-size:15px;font-weight:600;text-decoration:none;transition:all .2s;border:none;cursor:pointer;font-family:var(--font);width:48px;height:48px}
-.btn-p{background:var(--accent);color:#000}.btn-p:hover{background:var(--accent-h);color:#000;transform:translateY(-1px);box-shadow:0 4px 20px rgba(212,165,116,.3)}
-.btn-s{background:var(--surface);color:var(--t1);border:1px solid var(--border)}.btn-s:hover{border-color:var(--border-h);background:var(--elevated);transform:translateY(-1px)}
+.hero>p{font-size:18px;color:var(--t2);max-width:480px;margin:0 auto 48px;line-height:1.6}
+.actions{display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.btn-wrap{position:relative;display:inline-block}
+.btn-wrap::before,.btn-wrap::after{content:'';position:absolute;inset:-4px;border-radius:12px;opacity:0;transition:opacity .3s}
+.btn-wrap::before{border:1.5px solid var(--accent);animation:ripple 2.5s ease-out infinite}
+.btn-wrap::after{border:1.5px solid var(--accent);animation:ripple 2.5s ease-out infinite .8s}
+.btn-wrap:hover::before,.btn-wrap:hover::after{opacity:1}
+@keyframes ripple{0%{inset:-4px;opacity:.6}100%{inset:-18px;opacity:0}}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:14px;border-radius:10px;text-decoration:none;transition:all .2s;border:none;cursor:pointer;font-family:var(--font);width:50px;height:50px;position:relative;z-index:1}
+.btn-p{background:var(--accent);color:#000}.btn-p:hover{background:var(--accent-h);color:#000;transform:translateY(-2px);box-shadow:0 6px 24px rgba(212,165,116,.35)}
+.btn-s{background:var(--surface);color:var(--t1);border:1px solid var(--border)}.btn-s:hover{border-color:var(--accent);background:var(--elevated);transform:translateY(-2px);box-shadow:0 6px 24px rgba(212,165,116,.12)}
+.live-stats{display:flex;gap:20px;justify-content:center;margin-top:16px;font-size:13px;color:var(--t2)}
+.live-stat{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;background:var(--surface);border:1px solid var(--border);border-radius:16px;transition:border-color .2s}
+.live-stat:hover{border-color:var(--border-h)}
+.live-stat svg{opacity:.6}
+.live-stat b{color:var(--t1);font-weight:600}
 .install{display:flex;gap:10px;justify-content:center;margin:44px auto 0;max-width:360px}
 .install-cmd{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:13px 18px;font-family:var(--mono);font-size:14px;color:var(--t1);text-align:center;user-select:all}
 .copy{padding:13px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);cursor:pointer;font-size:13px;transition:.15s;font-family:var(--font)}.copy:hover{border-color:var(--border-h);color:var(--t1)}
@@ -102,11 +113,25 @@ footer a{color:var(--t2)}footer a:hover{color:var(--t1)}
   <h1>Your iframes crash phones.<br><em>We fix that.</em></h1>
   <p>Smart memory management for heavy WebGL and game iframes. Auto-detects devices, manages memory zones, prevents Safari from killing your page.</p>
   <div class="actions">
-    <a href="https://github.com/nano-step/iframe-shield" class="btn btn-p" title="GitHub" aria-label="GitHub">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+    <div class="btn-wrap">
+      <a href="https://github.com/nano-step/iframe-shield" class="btn btn-p" title="GitHub" aria-label="GitHub">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      </a>
+    </div>
+    <div class="btn-wrap">
+      <a href="https://www.npmjs.com/package/iframe-shield" class="btn btn-s" title="npm" aria-label="npm">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M0 7.334v8h6.666v1.332H12v-1.332h12v-8H0zm6.666 6.664H5.334v-4H3.999v4H1.335V8.667h5.331v5.331zm4 0v1.336H8.001V8.667h5.334v5.331h-2.669zm12.001 0h-1.33v-4h-1.336v4h-1.335v-4h-1.33v4h-2.671V8.667h8.002v5.331zM10.665 10H12v2.667h-1.335V10z"/></svg>
+      </a>
+    </div>
+  </div>
+  <div class="live-stats">
+    <a href="https://github.com/nano-step/iframe-shield/stargazers" class="live-stat" id="gh-stars">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <b>--</b> stars
     </a>
-    <a href="https://www.npmjs.com/package/iframe-shield" class="btn btn-s" title="npm" aria-label="npm">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M0 7.334v8h6.666v1.332H12v-1.332h12v-8H0zm6.666 6.664H5.334v-4H3.999v4H1.335V8.667h5.331v5.331zm4 0v1.336H8.001V8.667h5.334v5.331h-2.669zm12.001 0h-1.33v-4h-1.336v4h-1.335v-4h-1.33v4h-2.671V8.667h8.002v5.331zM10.665 10H12v2.667h-1.335V10z"/></svg>
+    <a href="https://www.npmjs.com/package/iframe-shield" class="live-stat" id="npm-downloads">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      <b>--</b>/week
     </a>
   </div>
   <div class="install">
@@ -282,6 +307,31 @@ var numObs=new IntersectionObserver(function(entries){
   });
 },{threshold:.5});
 document.querySelectorAll('.nums').forEach(function(el){numObs.observe(el)});
+
+(function fetchLiveStats(){
+  var CACHE_KEY='iframe-shield-stats';
+  var CACHE_TTL=3600000;
+  var cached=null;
+  try{cached=JSON.parse(localStorage.getItem(CACHE_KEY))}catch(e){}
+  if(cached&&Date.now()-cached.ts<CACHE_TTL){
+    renderStats(cached);
+    return;
+  }
+  Promise.all([
+    fetch('https://api.github.com/repos/nano-step/iframe-shield').then(function(r){return r.json()}).catch(function(){return null}),
+    fetch('https://api.npmjs.org/downloads/point/last-week/iframe-shield').then(function(r){return r.json()}).catch(function(){return null})
+  ]).then(function(res){
+    var data={stars:res[0]?res[0].stargazers_count:0,downloads:res[1]?res[1].downloads:0,ts:Date.now()};
+    try{localStorage.setItem(CACHE_KEY,JSON.stringify(data))}catch(e){}
+    renderStats(data);
+  });
+  function renderStats(d){
+    var sEl=document.querySelector('#gh-stars b');
+    var dEl=document.querySelector('#npm-downloads b');
+    if(sEl)sEl.textContent=d.stars>=1000?(d.stars/1000).toFixed(1)+'k':d.stars;
+    if(dEl)dEl.textContent=d.downloads>=1000?(d.downloads/1000).toFixed(1)+'k':d.downloads;
+  }
+})();
 </script>
 </body>
 </html>
