@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iframe-shield | Memory Protection for WebGL Iframes</title>
+<meta name="description" content="Your iframes are crashing your users phones. This fixes that.">
+<meta property="og:title" content="iframe-shield">
+<meta property="og:description" content="Smart memory management for heavy WebGL and game iframes. Zero dependencies.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nano-step.github.io/iframe-shield">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23d4a574'/%3E%3Cstop offset='100%25' stop-color='%23e0b88a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 5L85 20v30c0 22-15 38-35 45C30 88 15 72 15 50V20L50 5z' fill='url(%23g)'/%3E%3Cpath d='M50 25L35 55h10v20l15-30H50V25z' fill='%23111'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0c0c;--surface:#161616;--elevated:#1e1e1e;--border:rgba(255,255,255,.08);--border-h:rgba(255,255,255,.14);--t1:#f5f5f5;--t2:#999;--t3:#555;--accent:#d4a574;--accent-h:#e0b88a;--accent-s:rgba(212,165,116,.06);--green:#4ade80;--yellow:#facc15;--red:#f87171;--r:14px;--rs:8px;--font:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.w{max-width:800px;margin:0 auto;padding:0 24px}
+a{color:var(--accent);text-decoration:none}a:hover{color:var(--accent-h)}
+
+.hero{padding:100px 0 60px;text-align:center}
+.pill{display:inline-flex;gap:8px;padding:6px 16px;background:var(--accent-s);border:1px solid rgba(212,165,116,.15);border-radius:24px;font-size:13px;color:var(--accent);margin-bottom:28px;font-weight:500;animation:pillGlow 3s ease-in-out infinite}
+@keyframes pillGlow{0%,100%{border-color:rgba(212,165,116,.15);box-shadow:0 0 0 rgba(212,165,116,0)}50%{border-color:rgba(212,165,116,.4);box-shadow:0 0 20px rgba(212,165,116,.08)}}
+h1{font-size:clamp(32px,5vw,52px);font-weight:700;letter-spacing:-.035em;line-height:1.1;margin-bottom:20px}
+h1 em{font-style:normal;background:linear-gradient(135deg,#d4a574,#e8c9a0,#d4a574);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s ease-in-out infinite}
+@keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.hero>p{font-size:18px;color:var(--t2);max-width:480px;margin:0 auto 36px;line-height:1.6}
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:var(--rs);font-size:15px;font-weight:600;text-decoration:none;transition:all .2s;border:none;cursor:pointer;font-family:var(--font)}
+.btn-p{background:var(--accent);color:#000}.btn-p:hover{background:var(--accent-h);color:#000;transform:translateY(-1px);box-shadow:0 4px 20px rgba(212,165,116,.3)}
+.btn-s{background:var(--surface);color:var(--t1);border:1px solid var(--border)}.btn-s:hover{border-color:var(--border-h);background:var(--elevated);transform:translateY(-1px)}
+.install{display:flex;gap:10px;justify-content:center;margin:44px auto 0;max-width:360px}
+.install-cmd{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:13px 18px;font-family:var(--mono);font-size:14px;color:var(--t1);text-align:center;user-select:all}
+.copy{padding:13px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);color:var(--t2);cursor:pointer;font-size:13px;transition:.15s;font-family:var(--font)}.copy:hover{border-color:var(--border-h);color:var(--t1)}
+
+.nums{display:flex;gap:48px;justify-content:center;padding:56px 0;flex-wrap:wrap}
+.num{text-align:center}
+.num b{display:block;font-size:40px;font-weight:700;color:var(--accent);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.num span{font-size:13px;color:var(--t2);letter-spacing:.02em}
+
+section{padding:56px 0}section+section{border-top:1px solid var(--border)}
+h2{font-size:clamp(24px,3.5vw,32px);font-weight:700;letter-spacing:-.025em;margin-bottom:8px}
+section>.w>p.sub{color:var(--t2);margin-bottom:36px;font-size:16px}
+
+.anim{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}
+.anim.vis{opacity:1;transform:translateY(0)}
+
+.comparison{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:32px 0}
+.comp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px;transition:all .25s}
+.comp-card:hover{border-color:var(--border-h);transform:translateY(-2px)}
+.comp-card.bad{border-left:3px solid var(--red)}
+.comp-card.good{border-left:3px solid var(--green)}
+.comp-card h4{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.comp-card.bad h4{color:var(--red)}
+.comp-card.good h4{color:var(--green)}
+.comp-card p{font-size:14px;color:var(--t2);line-height:1.55}
+.comp-card strong{color:var(--t1)}
+
+.scenarios{display:grid;gap:12px;margin:32px 0}
+.scenario{display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;transition:border-color .2s}
+.scenario:hover{border-color:var(--border-h)}
+.scenario>div{padding:14px 18px;font-size:13px}
+.scenario>div:first-child{color:var(--t2);border-right:1px solid var(--border)}
+.scenario>div:nth-child(2){color:var(--red);border-right:1px solid var(--border)}
+.scenario>div:nth-child(3){color:var(--green)}
+.scenario-head{font-weight:600!important;color:var(--t1)!important;background:var(--elevated)}
+
+.features{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.feat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;transition:all .25s}
+.feat:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.feat h3{font-size:15px;font-weight:600;margin-bottom:4px}
+.feat p{font-size:13px;color:var(--t2);line-height:1.5}
+.feat-icon{width:32px;height:32px;background:var(--accent-s);border:1px solid rgba(212,165,116,.12);border-radius:6px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:16px}
+
+.zones{display:flex;gap:2px;margin:24px 0;border-radius:var(--rs);overflow:hidden;height:44px}
+.zone{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#111;letter-spacing:.03em;transition:flex .4s}
+.z-g{background:var(--green);flex:6}.z-y{background:var(--yellow);flex:1.5}.z-r{background:#fb923c;flex:1}.z-c{background:var(--red);flex:1}.z-e{background:#dc2626;flex:.5}
+
+.code{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px 26px;overflow-x:auto;margin:20px 0}
+.code pre{font-family:var(--mono);font-size:13px;line-height:1.65;color:var(--t2)}
+.code .k{color:#c4b5fd}.code .s{color:#86efac}.code .n{color:var(--accent)}.code .f{color:#7dd3fc}
+
+table{width:100%;border-collapse:collapse;margin:16px 0}
+th{text-align:left;padding:10px 16px;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+td{padding:10px 16px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.04)}
+tr:last-child td{border-bottom:none}
+
+.highlight-bar{height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);margin:48px 0;opacity:.4}
+
+footer{padding:40px 0;border-top:1px solid var(--border);text-align:center;font-size:13px;color:var(--t3)}
+footer a{color:var(--t2)}footer a:hover{color:var(--t1)}
+
+@media(max-width:640px){h1{font-size:28px}.comparison,.scenario{grid-template-columns:1fr}.features{grid-template-columns:1fr}.nums{gap:28px}.hero{padding:60px 0 40px}}
+</style>
+</head>
+<body>
+<div class="hero">
+<div class="w">
+  <div class="pill">v1.3 &middot; 0 deps &middot; TypeScript &middot; Apache 2.0</div>
+  <h1>Your iframes crash phones.<br><em>We fix that.</em></h1>
+  <p>Smart memory management for heavy WebGL and game iframes. Auto-detects devices, manages memory zones, prevents Safari from killing your page.</p>
+  <div class="actions">
+    <a href="https://github.com/nano-step/iframe-shield" class="btn btn-p">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <a href="https://www.npmjs.com/package/iframe-shield" class="btn btn-s">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M0 7.334v8h6.666v1.332H12v-1.332h12v-8H0zm6.666 6.664H5.334v-4H3.999v4H1.335V8.667h5.331v5.331zm4 0v1.336H8.001V8.667h5.334v5.331h-2.669zm12.001 0h-1.33v-4h-1.336v4h-1.335v-4h-1.33v4h-2.671V8.667h8.002v5.331zM10.665 10H12v2.667h-1.335V10z"/></svg>
+      npm
+    </a>
+  </div>
+  <div class="install">
+    <div class="install-cmd">npm i iframe-shield</div>
+    <button class="copy" onclick="navigator.clipboard.writeText('npm i iframe-shield');this.textContent='Done';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+  </div>
+</div>
+</div>
+
+<div class="nums">
+  <div class="num"><b data-target="16">0</b><span>Modules</span></div>
+  <div class="num"><b data-target="6">0</b><span>Device tiers</span></div>
+  <div class="num"><b data-target="5">0</b><span>Memory zones</span></div>
+  <div class="num"><b data-target="0">0</b><span>Dependencies</span></div>
+</div>
+
+<div class="highlight-bar"></div>
+
+<section>
+<div class="w">
+  <h2 class="anim">Before vs After</h2>
+  <p class="sub anim">Real scenarios. Real devices. Real pain &mdash; eliminated.</p>
+  <div class="scenarios anim">
+    <div class="scenario scenario-head">
+      <div>Scenario</div><div>Without iframe-shield</div><div>With iframe-shield</div>
+    </div>
+    <div class="scenario">
+      <div>iPhone 12 &mdash; game + payment</div>
+      <div><strong>Tab killed.</strong> White screen. Progress lost.</div>
+      <div><strong>Payment opens safely.</strong> Game untouched.</div>
+    </div>
+    <div class="scenario">
+      <div>iPhone 15 &mdash; switch to Messages</div>
+      <div><strong>Background tab killed</strong> in 3 seconds.</div>
+      <div><strong>Auto-freeze.</strong> Resume on return.</div>
+    </div>
+    <div class="scenario">
+      <div>iPad &mdash; 2 games on page</div>
+      <div><strong>Second iframe crashes</strong> entire tab.</div>
+      <div><strong>1 active, 1 frozen.</strong> Swap on tap.</div>
+    </div>
+    <div class="scenario">
+      <div>Android low-end &mdash; 600MB game</div>
+      <div><strong>5fps.</strong> Janky. Eventually OOM.</div>
+      <div><strong>Auto quality reduction.</strong> Smooth.</div>
+    </div>
+    <div class="scenario">
+      <div>Desktop Chrome</div>
+      <div>Works fine.</div>
+      <div>Detects desktop. <strong>Zero overhead.</strong></div>
+    </div>
+  </div>
+  <div class="comparison anim">
+    <div class="comp-card bad">
+      <h4>Without protection</h4>
+      <p>600MB iframe fills the budget. <strong>Any additional operation crashes the tab.</strong> Payment modals, chat widgets, tab switching &mdash; all fatal.</p>
+    </div>
+    <div class="comp-card good">
+      <h4>With iframe-shield</h4>
+      <p>Memory managed continuously. <strong>Device-aware budgets prevent overcommit.</strong> Quality degrades gracefully. Crashes auto-recover.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<section>
+<div class="w">
+  <h2 class="anim">Features</h2>
+  <p class="sub anim">Every layer works independently. If one misses, the next catches it.</p>
+  <div class="features">
+    <div class="feat anim"><div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg></div><h3>Device Profiling</h3><p>Auto-detects 6 tiers. Optimal budgets per device class.</p></div>
+    <div class="feat anim"><div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><h3>Memory Zones</h3><p>5 graduated zones. Proportional response to pressure.</p></div>
+    <div class="feat anim"><div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><h3>Game Proxy</h3><p>Same-origin proxy for full resource control.</p></div>
+    <div class="feat anim"><div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3>iOS Safari Shield</h3><p>Jetsam prevention. Background freeze. Tab recovery.</p></div>
+    <div class="feat anim"><div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div><h3>Crash Recovery</h3><p>Auto-restart at lower quality. Progressive degradation.</p></div>
+    <div class="feat anim"><div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div><h3>Graduated Freeze</h3><p>4 levels. Light pause to full destruction. Resume any.</p></div>
+    <div class="feat anim"><div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div><h3>Quality Control</h3><p>4 levels. 30s user-lock. Auto or manual.</p></div>
+    <div class="feat anim"><div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div><h3>Debug Overlay</h3><p>Shadow DOM debugger. Memory bar. Event log.</p></div>
+    <div class="feat anim"><div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><h3>Network Budget</h3><p>Track bytes per domain. Auto-act on limits.</p></div>
+    <div class="feat anim"><div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><h3>Memory Logging</h3><p>500-entry buffer. Timestamped. Exportable.</p></div>
+    <div class="feat anim"><div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><h3>Lazy Loading</h3><p>IntersectionObserver. Load on entry. Freeze on exit.</p></div>
+    <div class="feat anim"><div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div><h3>React Hook</h3><p>useIframeShield() &mdash; drop-in with full API.</p></div>
+  </div>
+</div>
+</section>
+
+<section>
+<div class="w">
+  <h2 class="anim">Memory zones</h2>
+  <p class="sub anim">Proportional response. Not too aggressive. Not too late.</p>
+  <div class="zones anim">
+    <div class="zone z-g">GREEN</div>
+    <div class="zone z-y">YELLOW</div>
+    <div class="zone z-r">RED</div>
+    <div class="zone z-c">CRIT</div>
+    <div class="zone z-e">!</div>
+  </div>
+  <table class="anim">
+    <thead><tr><th>Zone</th><th>Utilization</th><th>Response</th></tr></thead>
+    <tbody>
+      <tr><td>Green</td><td>0 &ndash; 60%</td><td>Normal operation</td></tr>
+      <tr><td>Yellow</td><td>60 &ndash; 75%</td><td>Quality steps down</td></tr>
+      <tr><td>Red</td><td>75 &ndash; 85%</td><td>Non-visible iframes frozen</td></tr>
+      <tr><td>Critical</td><td>85 &ndash; 95%</td><td>Single iframe, minimal quality</td></tr>
+      <tr><td>Emergency</td><td>95%+</td><td>Destroy low-priority iframes</td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<section>
+<div class="w">
+  <h2 class="anim">Device-aware</h2>
+  <p class="sub anim"><code style="background:var(--elevated);padding:2px 10px;border-radius:4px;font-family:var(--mono);font-size:13px">deviceProfile: 'auto'</code></p>
+  <table class="anim">
+    <thead><tr><th>Device</th><th>Budget</th><th>Strategy</th></tr></thead>
+    <tbody>
+      <tr><td>iPhone SE / older Android</td><td>600 MB</td><td style="color:var(--red)">Aggressive</td></tr>
+      <tr><td>iPhone 12-15</td><td>800 MB</td><td style="color:var(--yellow)">Balanced</td></tr>
+      <tr><td>iPhone 16 Pro / flagship</td><td>1000 MB</td><td style="color:var(--green)">Relaxed</td></tr>
+      <tr><td>iPad</td><td>1000 MB</td><td style="color:var(--green)">Relaxed</td></tr>
+      <tr><td>Laptop / Desktop</td><td>1500 MB</td><td style="color:var(--t2)">Minimal</td></tr>
+      <tr><td>Gaming PC</td><td>2500 MB</td><td style="color:var(--t2)">Monitor only</td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<section>
+<div class="w">
+  <h2 class="anim">Quick start</h2>
+  <div class="code anim"><pre><span class="k">import</span> { <span class="f">useIframeShield</span> } <span class="k">from</span> <span class="s">'iframe-shield/react'</span>;
+
+<span class="k">function</span> <span class="f">Game</span>({ url }) {
+  <span class="k">const</span> { iframeRef } = <span class="f">useIframeShield</span>({
+    src: url,
+    estimatedMemoryMB: <span class="n">700</span>,
+    config: { quality: <span class="s">'auto'</span>, crashRecovery: { enabled: <span class="n">true</span> } },
+  });
+  <span class="k">return</span> &lt;iframe ref={iframeRef} src={url} /&gt;;
+}</pre></div>
+</div>
+</section>
+
+<footer>
+<div class="w">
+  &copy; 2025 Hoai Nho. Apache 2.0 &middot; <a href="https://github.com/nano-step/iframe-shield">GitHub</a> &middot; <a href="https://www.npmjs.com/package/iframe-shield">npm</a>
+</div>
+</footer>
+
+<script>
+var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('vis');io.unobserve(e.target)}})},{threshold:.15});
+document.querySelectorAll('.anim').forEach(function(el){io.observe(el)});
+
+var counted=false;
+var numObs=new IntersectionObserver(function(entries){
+  if(counted)return;
+  entries.forEach(function(e){
+    if(!e.isIntersecting)return;
+    counted=true;
+    document.querySelectorAll('.num b[data-target]').forEach(function(el){
+      var target=parseInt(el.dataset.target);
+      if(target===0){el.textContent='0';return}
+      var start=0;var dur=1200;var t0=performance.now();
+      function tick(now){
+        var p=Math.min((now-t0)/dur,1);
+        p=1-Math.pow(1-p,3);
+        el.textContent=Math.round(start+(target-start)*p);
+        if(p<1)requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  });
+},{threshold:.5});
+document.querySelectorAll('.nums').forEach(function(el){numObs.observe(el)});
+</script>
+</body>
+</html>
