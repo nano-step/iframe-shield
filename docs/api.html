@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API Reference | iframe-shield</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23d4a574'/%3E%3Cstop offset='100%25' stop-color='%23e0b88a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 5L85 20v30c0 22-15 38-35 45C30 88 15 72 15 50V20L50 5z' fill='url(%23g)'/%3E%3Cpath d='M50 25L35 55h10v20l15-30H50V25z' fill='%23111'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <a href="index.html" class="sidebar-logo"><svg width="20" height="20" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d4a574"/><stop offset="100%" stop-color="#e0b88a"/></linearGradient></defs><path d="M50 5L85 20v30c0 22-15 38-35 45C30 88 15 72 15 50V20L50 5z" fill="url(#g)"/><path d="M50 25L35 55h10v20l15-30H50V25z" fill="#111"/></svg> iframe-shield</a>
+  <div class="sidebar-section"><div class="sidebar-title">Getting Started</div>
+    <a href="quick-start.html" class="nav-link">Quick Start</a>
+    <a href="configuration.html" class="nav-link">Configuration</a>
+    <a href="api.html" class="nav-link active">API Reference</a>
+  </div>
+  <div class="sidebar-section"><div class="sidebar-title">Features</div>
+    <a href="device-profiling.html" class="nav-link">Device Profiling</a>
+    <a href="memory-zones.html" class="nav-link">Memory Zones</a>
+    <a href="game-proxy.html" class="nav-link">Game Proxy</a>
+    <a href="ios-safari.html" class="nav-link">iOS Safari</a>
+    <a href="crash-recovery.html" class="nav-link">Crash Recovery</a>
+    <a href="debug-overlay.html" class="nav-link">Debug Overlay</a>
+  </div>
+  <div class="sidebar-section"><div class="sidebar-title">Links</div>
+    <a href="https://github.com/nano-step/iframe-shield" class="nav-link">GitHub</a>
+    <a href="https://www.npmjs.com/package/iframe-shield" class="nav-link">npm</a>
+  </div>
+</nav>
+
+<main class="main">
+<h1>API Reference</h1>
+
+<h2>IframeShield</h2>
+
+<h3>Constructor</h3>
+<pre><span class="k">new</span> <span class="f">IframeShield</span>(config?: Partial&lt;IframeShieldConfig&gt;)</pre>
+<p>Creates a new instance. Automatically starts memory monitoring, device detection, and crash recovery.</p>
+
+<h3>.register(target, options?)</h3>
+<pre>shield.<span class="f">register</span>(
+  target: <span class="s">string</span> | HTMLIFrameElement,
+  options?: RegisterOptions
+): <span class="s">string</span></pre>
+<p>Register an iframe for protection. Returns a unique shield ID.</p>
+<table>
+<thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>target</code></td><td><code>string | HTMLIFrameElement</code></td><td>CSS selector or element reference</td></tr>
+<tr><td><code>options.priority</code></td><td><code>number</code></td><td>Higher = kept alive longer under pressure. Default: <code>0</code></td></tr>
+<tr><td><code>options.estimatedMemoryMB</code></td><td><code>number</code></td><td>Estimated memory usage of iframe content</td></tr>
+<tr><td><code>options.quality</code></td><td><code>QualityLevel</code></td><td>Override auto quality for this iframe</td></tr>
+</tbody>
+</table>
+
+<h3>.setQuality(target, quality)</h3>
+<pre>shield.<span class="f">setQuality</span>(target: <span class="s">string</span> | HTMLIFrameElement, quality: QualityLevel): <span class="s">void</span></pre>
+<p>Set quality level. Blocked in yellow+ memory zones for upgrades. Manual changes trigger a 30-second user lock.</p>
+
+<h3>.freeze(target, level?)</h3>
+<pre>shield.<span class="f">freeze</span>(target: <span class="s">string</span> | HTMLIFrameElement, level?: FreezeLevel): <span class="s">void</span></pre>
+<table>
+<thead><tr><th>Level</th><th>Effect</th><th>Resumable?</th></tr></thead>
+<tbody>
+<tr><td><code>1</code></td><td>Viewport shrink via HTML attributes</td><td>Yes, instant</td></tr>
+<tr><td><code>2</code></td><td>Detach from DOM, keep reference</td><td>Yes, re-attach</td></tr>
+<tr><td><code>3</code></td><td>Set src=about:blank, destroy WebGL context</td><td>Yes, full reload</td></tr>
+</tbody>
+</table>
+
+<h3>.resume(target)</h3>
+<pre>shield.<span class="f">resume</span>(target: <span class="s">string</span> | HTMLIFrameElement): <span class="s">void</span></pre>
+<p>Resume from any freeze level. Level 3 requires full iframe reload. Blocked in red+ zones.</p>
+
+<h3>.destroy(target)</h3>
+<pre>shield.<span class="f">destroy</span>(target: <span class="s">string</span> | HTMLIFrameElement): <span class="s">void</span></pre>
+<p>Permanently remove iframe and free all memory. Cannot be resumed.</p>
+
+<h3>.getStats()</h3>
+<pre>shield.<span class="f">getStats</span>(): ShieldStats</pre>
+<p>Returns current state:</p>
+<pre>{
+  totalRegistered: <span class="n">number</span>,
+  activeCount: <span class="n">number</span>,
+  frozenCount: <span class="n">number</span>,
+  estimatedTotalMemoryMB: <span class="n">number</span>,
+  memoryBudgetMB: <span class="n">number</span>,
+  memoryZone: MemoryZone,
+  wasmProbeAvailable: <span class="n">boolean</span>,
+  crashRecoveryActive: <span class="n">boolean</span>,
+  iframes: IframeStats[]
+}</pre>
+
+<h3>.getMemoryZone()</h3>
+<pre>shield.<span class="f">getMemoryZone</span>(): <span class="s">'green'</span> | <span class="s">'yellow'</span> | <span class="s">'red'</span> | <span class="s">'critical'</span> | <span class="s">'emergency'</span></pre>
+
+<h3>.getFreezeLevel(target)</h3>
+<pre>shield.<span class="f">getFreezeLevel</span>(target): FreezeLevel | <span class="n">null</span></pre>
+
+<h3>.dispose()</h3>
+<pre>shield.<span class="f">dispose</span>(): <span class="s">void</span></pre>
+<p>Cleanup everything. Restore all iframes to original state. Remove all listeners.</p>
+
+<h2>GameProxy</h2>
+
+<h3>Constructor</h3>
+<pre><span class="k">new</span> <span class="f">GameProxy</span>(config?: Partial&lt;GameProxyConfig&gt;)</pre>
+
+<h3>.createProxyIframe(gameUrl, container, onReport?)</h3>
+<pre>proxy.<span class="f">createProxyIframe</span>(
+  gameUrl: <span class="s">string</span>,
+  container: HTMLElement,
+  onReport?: (data) =&gt; <span class="s">void</span>
+): Promise&lt;ProxyResult&gt;</pre>
+<p>Fetches game HTML, rewrites URLs, injects WebGL interceptor, creates blob: iframe.</p>
+
+<h3>.destroy()</h3>
+<pre>proxy.<span class="f">destroy</span>(): <span class="s">void</span></pre>
+<p>Revoke blob URLs, remove message listeners.</p>
+
+<h2>React Hook</h2>
+<pre><span class="k">import</span> { <span class="f">useIframeShield</span> } <span class="k">from</span> <span class="s">'iframe-shield/react'</span>;
+
+<span class="k">const</span> {
+  iframeRef,       <span class="c">// RefObject&lt;HTMLIFrameElement&gt;</span>
+  shieldId,        <span class="c">// string | null</span>
+  stats,           <span class="c">// ShieldStats | null (updates every 5s)</span>
+  setQuality,      <span class="c">// (quality: QualityLevel) => void</span>
+  freeze,          <span class="c">// () => void</span>
+  resume,          <span class="c">// () => void</span>
+  destroy,         <span class="c">// () => void</span>
+  refresh,         <span class="c">// () => void (force stats refresh)</span>
+} = <span class="f">useIframeShield</span>(options);</pre>
+
+<h2>Types</h2>
+
+<h3>QualityLevel</h3>
+<pre><span class="k">type</span> QualityLevel = <span class="s">'high'</span> | <span class="s">'medium'</span> | <span class="s">'low'</span> | <span class="s">'minimal'</span></pre>
+
+<h3>FreezeLevel</h3>
+<pre><span class="k">type</span> FreezeLevel = <span class="n">0</span> | <span class="n">1</span> | <span class="n">2</span> | <span class="n">3</span></pre>
+
+<h3>MemoryZone</h3>
+<pre><span class="k">type</span> MemoryZone = <span class="s">'green'</span> | <span class="s">'yellow'</span> | <span class="s">'red'</span> | <span class="s">'critical'</span> | <span class="s">'emergency'</span></pre>
+
+<h3>DeviceTier</h3>
+<pre><span class="k">type</span> DeviceTier = <span class="s">'low-end-mobile'</span> | <span class="s">'mid-mobile'</span> | <span class="s">'high-mobile'</span>
+  | <span class="s">'tablet'</span> | <span class="s">'desktop'</span> | <span class="s">'high-end-desktop'</span></pre>
+
+<h2>Standalone Utilities</h2>
+
+<h3>detectDeviceProfile()</h3>
+<pre><span class="k">import</span> { <span class="f">detectDeviceProfile</span> } <span class="k">from</span> <span class="s">'iframe-shield'</span>;
+<span class="k">const</span> tier = <span class="f">detectDeviceProfile</span>(); <span class="c">// DeviceTier</span></pre>
+
+<h3>getConfigForProfile(tier)</h3>
+<pre><span class="k">import</span> { <span class="f">getConfigForProfile</span> } <span class="k">from</span> <span class="s">'iframe-shield'</span>;
+<span class="k">const</span> config = <span class="f">getConfigForProfile</span>(<span class="s">'mid-mobile'</span>); <span class="c">// Partial&lt;IframeShieldConfig&gt;</span></pre>
+
+<h3>buildInterceptorScript(config)</h3>
+<pre><span class="k">import</span> { <span class="f">buildInterceptorScript</span> } <span class="k">from</span> <span class="s">'iframe-shield'</span>;
+<span class="k">const</span> js = <span class="f">buildInterceptorScript</span>({ maxTextureSize: <span class="n">512</span> }); <span class="c">// string</span></pre>
+
+<h3>getDeviceInfo()</h3>
+<pre><span class="k">import</span> { <span class="f">getDeviceInfo</span> } <span class="k">from</span> <span class="s">'iframe-shield'</span>;
+<span class="k">const</span> info = <span class="f">getDeviceInfo</span>();
+<span class="c">// { isIOS, isSafari, isIOSSafari, isMobile, deviceMemoryGB, estimatedMaxMemoryMB, ... }</span></pre>
+
+</main>
+</div>
+</body>
+</html>

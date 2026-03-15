@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuration | iframe-shield</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23d4a574'/%3E%3Cstop offset='100%25' stop-color='%23e0b88a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 5L85 20v30c0 22-15 38-35 45C30 88 15 72 15 50V20L50 5z' fill='url(%23g)'/%3E%3Cpath d='M50 25L35 55h10v20l15-30H50V25z' fill='%23111'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <a href="index.html" class="sidebar-logo"><svg width="20" height="20" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d4a574"/><stop offset="100%" stop-color="#e0b88a"/></linearGradient></defs><path d="M50 5L85 20v30c0 22-15 38-35 45C30 88 15 72 15 50V20L50 5z" fill="url(#g)"/><path d="M50 25L35 55h10v20l15-30H50V25z" fill="#111"/></svg> iframe-shield</a>
+  <div class="sidebar-section"><div class="sidebar-title">Getting Started</div>
+    <a href="quick-start.html" class="nav-link">Quick Start</a>
+    <a href="configuration.html" class="nav-link active">Configuration</a>
+    <a href="api.html" class="nav-link">API Reference</a>
+  </div>
+  <div class="sidebar-section"><div class="sidebar-title">Features</div>
+    <a href="device-profiling.html" class="nav-link">Device Profiling</a>
+    <a href="memory-zones.html" class="nav-link">Memory Zones</a>
+    <a href="game-proxy.html" class="nav-link">Game Proxy</a>
+    <a href="ios-safari.html" class="nav-link">iOS Safari</a>
+    <a href="crash-recovery.html" class="nav-link">Crash Recovery</a>
+    <a href="debug-overlay.html" class="nav-link">Debug Overlay</a>
+  </div>
+  <div class="sidebar-section"><div class="sidebar-title">Links</div>
+    <a href="https://github.com/nano-step/iframe-shield" class="nav-link">GitHub</a>
+    <a href="https://www.npmjs.com/package/iframe-shield" class="nav-link">npm</a>
+  </div>
+</nav>
+
+<main class="main">
+<h1>Configuration</h1>
+
+<h2>Core Options</h2>
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>memoryBudgetMB</code></td><td><code>number</code></td><td><code>600</code></td><td>Total memory budget in MB. Triggers watermark zones when exceeded.</td></tr>
+<tr><td><code>quality</code></td><td><code>'auto' | QualityLevel</code></td><td><code>'auto'</code></td><td>Initial quality. <code>auto</code> selects based on device tier.</td></tr>
+<tr><td><code>maxConcurrentActive</code></td><td><code>number</code></td><td><code>1</code></td><td>Max iframes active simultaneously. Others frozen with placeholders.</td></tr>
+<tr><td><code>lazyLoad</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Load iframes only when visible (IntersectionObserver).</td></tr>
+<tr><td><code>rootMargin</code></td><td><code>string</code></td><td><code>'200px'</code></td><td>Preload distance before viewport entry.</td></tr>
+<tr><td><code>deviceProfile</code></td><td><code>'auto' | DeviceTier</code></td><td><code>'auto'</code></td><td>Device tier detection. <code>auto</code> detects from UA and screen.</td></tr>
+</tbody>
+</table>
+
+<h2>iOS Configuration</h2>
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>ios.crashPrevention</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enable all iOS Safari protections.</td></tr>
+<tr><td><code>ios.backgroundFreeze</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Freeze all iframes when page is backgrounded.</td></tr>
+<tr><td><code>ios.backgroundDestroyLowPriority</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Destroy low-priority iframes on background (not just freeze).</td></tr>
+<tr><td><code>ios.memoryWarningThreshold</code></td><td><code>number</code></td><td><code>0.7</code></td><td>Start degrading at this fraction of budget (0-1).</td></tr>
+<tr><td><code>ios.aggressiveCleanup</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Aggressive GC hints and resource cleanup.</td></tr>
+<tr><td><code>ios.maxMemoryMB</code></td><td><code>number</code></td><td><code>1200</code></td><td>Estimated Safari memory limit for device.</td></tr>
+<tr><td><code>ios.sandboxAttributes</code></td><td><code>string</code></td><td><code>'allow-scripts allow-same-origin allow-popups'</code></td><td>Sandbox attributes applied to iframes.</td></tr>
+</tbody>
+</table>
+
+<h2>Watermark Zones</h2>
+<p>Thresholds are fractions of <code>memoryBudgetMB</code>.</p>
+<table>
+<thead><tr><th>Option</th><th>Default</th><th>Zone triggered above</th></tr></thead>
+<tbody>
+<tr><td><code>watermark.greenMax</code></td><td><code>0.6</code></td><td>Yellow (auto-downgrade quality)</td></tr>
+<tr><td><code>watermark.yellowMax</code></td><td><code>0.75</code></td><td>Red (freeze non-visible)</td></tr>
+<tr><td><code>watermark.redMax</code></td><td><code>0.85</code></td><td>Critical (single iframe, minimal quality)</td></tr>
+<tr><td><code>watermark.criticalMax</code></td><td><code>0.95</code></td><td>Emergency (destroy low-priority)</td></tr>
+</tbody>
+</table>
+
+<h2>Crash Recovery</h2>
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>crashRecovery.enabled</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enable crash detection and auto-recovery.</td></tr>
+<tr><td><code>crashRecovery.storageKey</code></td><td><code>string</code></td><td><code>'iframe-shield-recovery'</code></td><td>sessionStorage key for crash state.</td></tr>
+<tr><td><code>crashRecovery.stabilityPeriodMs</code></td><td><code>number</code></td><td><code>30000</code></td><td>Milliseconds stable before resetting crash counter.</td></tr>
+<tr><td><code>crashRecovery.maxRecoveryAttempts</code></td><td><code>number</code></td><td><code>3</code></td><td>After N crashes, load at minimal quality permanently.</td></tr>
+</tbody>
+</table>
+
+<h2>Network Budget</h2>
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>networkBudget.enabled</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Track bytes transferred per iframe domain.</td></tr>
+<tr><td><code>networkBudget.maxTransferMB</code></td><td><code>number</code></td><td><code>500</code></td><td>Freeze iframe after this many MB downloaded.</td></tr>
+<tr><td><code>networkBudget.trackingIntervalMs</code></td><td><code>number</code></td><td><code>2000</code></td><td>How often to check transfer budgets.</td></tr>
+</tbody>
+</table>
+
+<h2>Debug Overlay</h2>
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>debugger.enabled</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Show visual debug overlay.</td></tr>
+<tr><td><code>debugger.position</code></td><td><code>DebugOverlayPosition</code></td><td><code>'bottom-right'</code></td><td>Overlay position: <code>bottom-right</code>, <code>bottom-left</code>, <code>top-right</code>, <code>top-left</code>.</td></tr>
+<tr><td><code>debugger.shortcut</code></td><td><code>string</code></td><td><code>'ctrl+shift+q'</code></td><td>Keyboard shortcut to toggle overlay.</td></tr>
+</tbody>
+</table>
+
+<h2>Game Proxy / Interceptor</h2>
+<table>
+<thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>interceptor.maxTextureSize</code></td><td><code>number</code></td><td><code>1024</code></td><td>Max texture dimension in pixels. Larger textures are downscaled.</td></tr>
+<tr><td><code>interceptor.maxCanvasWidth</code></td><td><code>number</code></td><td><code>1280</code></td><td>Max WebGL canvas width.</td></tr>
+<tr><td><code>interceptor.maxCanvasHeight</code></td><td><code>number</code></td><td><code>720</code></td><td>Max WebGL canvas height.</td></tr>
+<tr><td><code>interceptor.maxDevicePixelRatio</code></td><td><code>number</code></td><td><code>1</code></td><td>Override window.devicePixelRatio.</td></tr>
+<tr><td><code>interceptor.maxFps</code></td><td><code>number</code></td><td><code>30</code></td><td>Throttle requestAnimationFrame to this FPS.</td></tr>
+<tr><td><code>interceptor.maxWasmMemoryMB</code></td><td><code>number</code></td><td><code>256</code></td><td>Cap WebAssembly.Memory maximum pages.</td></tr>
+<tr><td><code>interceptor.audioSampleRate</code></td><td><code>number</code></td><td><code>22050</code></td><td>Downsample decoded audio buffers to this rate.</td></tr>
+</tbody>
+</table>
+
+<h2>Callbacks</h2>
+<table>
+<thead><tr><th>Callback</th><th>Arguments</th><th>When</th></tr></thead>
+<tbody>
+<tr><td><code>onMemoryWarning</code></td><td><code>(info: MemoryWarningInfo)</code></td><td>Memory pressure detected</td></tr>
+<tr><td><code>onQualityChange</code></td><td><code>(id, oldQ, newQ)</code></td><td>Quality level changed</td></tr>
+<tr><td><code>onIframeFreeze</code></td><td><code>(id)</code></td><td>Iframe frozen</td></tr>
+<tr><td><code>onIframeResume</code></td><td><code>(id)</code></td><td>Iframe resumed</td></tr>
+<tr><td><code>onIframeDestroy</code></td><td><code>(id)</code></td><td>Iframe destroyed</td></tr>
+<tr><td><code>onCrashPrevented</code></td><td><code>(id, reason)</code></td><td>Crash was prevented</td></tr>
+<tr><td><code>onCrashRecovered</code></td><td><code>(info: CrashRecoveryInfo)</code></td><td>Recovered from previous crash</td></tr>
+<tr><td><code>onWatermarkZoneChange</code></td><td><code>(oldZone, newZone)</code></td><td>Memory zone transition</td></tr>
+<tr><td><code>onError</code></td><td><code>(error: IframeShieldError)</code></td><td>Internal error</td></tr>
+</tbody>
+</table>
+
+<h2>Full Example</h2>
+<pre><span class="k">new</span> <span class="f">IframeShield</span>({
+  memoryBudgetMB: <span class="n">600</span>,
+  quality: <span class="s">'auto'</span>,
+  maxConcurrentActive: <span class="n">1</span>,
+  lazyLoad: <span class="n">true</span>,
+  rootMargin: <span class="s">'200px'</span>,
+  deviceProfile: <span class="s">'auto'</span>,
+
+  ios: {
+    crashPrevention: <span class="n">true</span>,
+    backgroundFreeze: <span class="n">true</span>,
+    backgroundDestroyLowPriority: <span class="n">true</span>,
+    memoryWarningThreshold: <span class="n">0.7</span>,
+    aggressiveCleanup: <span class="n">true</span>,
+    maxMemoryMB: <span class="n">1200</span>,
+  },
+
+  watermark: { greenMax: <span class="n">0.6</span>, yellowMax: <span class="n">0.75</span>, redMax: <span class="n">0.85</span>, criticalMax: <span class="n">0.95</span> },
+  crashRecovery: { enabled: <span class="n">true</span>, stabilityPeriodMs: <span class="n">30000</span>, maxRecoveryAttempts: <span class="n">3</span> },
+  networkBudget: { enabled: <span class="n">true</span>, maxTransferMB: <span class="n">500</span> },
+  debugger: { enabled: <span class="n">false</span>, position: <span class="s">'bottom-right'</span>, shortcut: <span class="s">'ctrl+shift+q'</span> },
+
+  onMemoryWarning: (info) =&gt; console.log(<span class="s">'Memory:'</span>, info.estimatedUsageMB, <span class="s">'MB'</span>),
+  onQualityChange: (id, oldQ, newQ) =&gt; console.log(id, oldQ, <span class="s">'-&gt;'</span>, newQ),
+  onCrashPrevented: (id, reason) =&gt; console.warn(<span class="s">'Crash prevented:'</span>, reason),
+});</pre>
+
+</main>
+</div>
+</body>
+</html>

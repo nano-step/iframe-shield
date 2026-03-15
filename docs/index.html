@@ -29,11 +29,9 @@ h1 em{font-style:normal;background:linear-gradient(135deg,#d4a574,#e8c9a0,#d4a57
 .hero>p{font-size:18px;color:var(--t2);max-width:480px;margin:0 auto 48px;line-height:1.6}
 .actions{display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:8px}
 .btn-wrap{position:relative;display:inline-block}
-.btn-wrap::before,.btn-wrap::after{content:'';position:absolute;inset:-4px;border-radius:12px;opacity:0;transition:opacity .3s}
-.btn-wrap::before{border:1.5px solid var(--accent);animation:ripple 2.5s ease-out infinite}
-.btn-wrap::after{border:1.5px solid var(--accent);animation:ripple 2.5s ease-out infinite .8s}
-.btn-wrap:hover::before,.btn-wrap:hover::after{opacity:1}
-@keyframes ripple{0%{inset:-4px;opacity:.6}100%{inset:-18px;opacity:0}}
+.btn-wrap::before{content:'';position:absolute;inset:-3px;border-radius:12px;border:1px solid var(--accent);opacity:0;transition:opacity .4s}
+.btn-wrap:hover::before{opacity:.35;animation:softPulse 2s ease-in-out infinite}
+@keyframes softPulse{0%,100%{inset:-3px;opacity:.35}50%{inset:-7px;opacity:.12}}
 .btn{display:inline-flex;align-items:center;justify-content:center;padding:14px;border-radius:10px;text-decoration:none;transition:all .2s;border:none;cursor:pointer;font-family:var(--font);width:50px;height:50px;position:relative;z-index:1}
 .btn-p{background:var(--accent);color:#000}.btn-p:hover{background:var(--accent-h);color:#000;transform:translateY(-2px);box-shadow:0 6px 24px rgba(212,165,116,.35)}
 .btn-s{background:var(--surface);color:var(--t1);border:1px solid var(--border)}.btn-s:hover{border-color:var(--accent);background:var(--elevated);transform:translateY(-2px);box-shadow:0 6px 24px rgba(212,165,116,.12)}

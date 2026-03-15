@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23d4a574'/%3E%3Cstop offset='100%25' stop-color='%23e0b88a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 5L85 20v30c0 22-15 38-35 45C30 88 15 72 15 50V20L50 5z' fill='url(%23g)'/%3E%3Cpath d='M50 25L35 55h10v20l15-30H50V25z' fill='%23111'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet"><link rel="stylesheet" href="docs.css"><title>Game Proxy | iframe-shield</title></head><body><div class="layout"><nav class="sidebar"><a href="index.html" class="sidebar-logo"><svg width="20" height="20" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d4a574"/><stop offset="100%" stop-color="#e0b88a"/></linearGradient></defs><path d="M50 5L85 20v30c0 22-15 38-35 45C30 88 15 72 15 50V20L50 5z" fill="url(#g)"/><path d="M50 25L35 55h10v20l15-30H50V25z" fill="#111"/></svg> iframe-shield</a><div class="sidebar-section"><div class="sidebar-title">Getting Started</div><a href="quick-start.html" class="nav-link">Quick Start</a><a href="configuration.html" class="nav-link">Configuration</a><a href="api.html" class="nav-link">API Reference</a></div><div class="sidebar-section"><div class="sidebar-title">Features</div><a href="device-profiling.html" class="nav-link">Device Profiling</a><a href="memory-zones.html" class="nav-link">Memory Zones</a><a href="game-proxy.html" class="nav-link">Game Proxy</a><a href="ios-safari.html" class="nav-link">iOS Safari</a><a href="crash-recovery.html" class="nav-link">Crash Recovery</a><a href="debug-overlay.html" class="nav-link">Debug Overlay</a></div><div class="sidebar-section"><div class="sidebar-title">Links</div><a href="https://github.com/nano-step/iframe-shield" class="nav-link">GitHub</a><a href="https://www.npmjs.com/package/iframe-shield" class="nav-link">npm</a></div></nav><main class="main">
+<h1>Game Proxy</h1>
+<p>Load third-party games through a same-origin proxy to gain full control over resource usage and memory allocation.</p>
+<h2>How It Works</h2>
+<ol><li>Fetches game HTML via <code>fetch()</code> (requires CORS)</li><li>Rewrites relative URLs to absolute</li><li>Injects WebGL interceptor before game scripts</li><li>Serves as <code>blob:</code> iframe (same-origin)</li></ol>
+<h2>Usage</h2>
+<pre><span class="k">import</span> { <span class="f">GameProxy</span> } <span class="k">from</span> <span class="s">'iframe-shield'</span>;
+
+<span class="k">const</span> proxy = <span class="k">new</span> <span class="f">GameProxy</span>({
+  interceptor: {
+    maxTextureSize: <span class="n">1024</span>,
+    maxCanvasWidth: <span class="n">1280</span>,
+    maxCanvasHeight: <span class="n">720</span>,
+    maxDevicePixelRatio: <span class="n">1</span>,
+    maxFps: <span class="n">30</span>,
+    maxWasmMemoryMB: <span class="n">256</span>,
+    audioSampleRate: <span class="n">22050</span>,
+  },
+});
+
+<span class="k">await</span> proxy.<span class="f">createProxyIframe</span>(<span class="s">'https://game-server.com/game'</span>, container, (report) =&gt; {
+  console.log(<span class="s">'GPU allocated:'</span>, report.totalAllocatedMB, <span class="s">'MB'</span>);
+});</pre>
+<h2>Interceptor Report</h2>
+<p>The proxy sends allocation reports every 5 seconds via <code>postMessage</code>:</p>
+<pre>{
+  totalAllocatedMB: <span class="n">185</span>,
+  breakdown: { texturesMB: <span class="n">80</span>, compressedMB: <span class="n">45</span>, renderbuffersMB: <span class="n">10</span>, wasmMB: <span class="n">50</span> },
+  stats: { textureCount: <span class="n">24</span>, downscaledCount: <span class="n">18</span>, fetchRequests: <span class="n">156</span> },
+  config: { maxTextureSize: <span class="n">1024</span>, maxFps: <span class="n">30</span>, dpr: <span class="n">1</span> }
+}</pre>
+<div class="tip"><strong>Tip:</strong> The game server must have <code>Access-Control-Allow-Origin: *</code> or your origin for the proxy to work without a CORS backend.</div>
+</main></div></body></html>

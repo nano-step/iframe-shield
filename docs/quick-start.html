@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quick Start | iframe-shield</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23d4a574'/%3E%3Cstop offset='100%25' stop-color='%23e0b88a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 5L85 20v30c0 22-15 38-35 45C30 88 15 72 15 50V20L50 5z' fill='url(%23g)'/%3E%3Cpath d='M50 25L35 55h10v20l15-30H50V25z' fill='%23111'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="docs.css">
+</head>
+<body>
+<div class="layout">
+
+<nav class="sidebar">
+  <a href="index.html" class="sidebar-logo">
+    <svg width="20" height="20" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d4a574"/><stop offset="100%" stop-color="#e0b88a"/></linearGradient></defs><path d="M50 5L85 20v30c0 22-15 38-35 45C30 88 15 72 15 50V20L50 5z" fill="url(#g)"/><path d="M50 25L35 55h10v20l15-30H50V25z" fill="#111"/></svg>
+    iframe-shield
+  </a>
+  <div class="sidebar-section">
+    <div class="sidebar-title">Getting Started</div>
+    <a href="quick-start.html" class="nav-link active">Quick Start</a>
+    <a href="configuration.html" class="nav-link">Configuration</a>
+    <a href="api.html" class="nav-link">API Reference</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-title">Features</div>
+    <a href="device-profiling.html" class="nav-link">Device Profiling</a>
+    <a href="memory-zones.html" class="nav-link">Memory Zones</a>
+    <a href="game-proxy.html" class="nav-link">Game Proxy</a>
+    <a href="ios-safari.html" class="nav-link">iOS Safari</a>
+    <a href="crash-recovery.html" class="nav-link">Crash Recovery</a>
+    <a href="debug-overlay.html" class="nav-link">Debug Overlay</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-title">Links</div>
+    <a href="https://github.com/nano-step/iframe-shield" class="nav-link">GitHub</a>
+    <a href="https://www.npmjs.com/package/iframe-shield" class="nav-link">npm</a>
+    <a href="index.html" class="nav-link">Home</a>
+  </div>
+</nav>
+
+<main class="main">
+<h1>Quick Start</h1>
+
+<h2>Installation</h2>
+<pre>npm install iframe-shield</pre>
+
+<h2>Vanilla JavaScript</h2>
+<p>Create an instance, register your iframe, and everything else is automatic.</p>
+<pre><span class="k">import</span> { <span class="f">IframeShield</span> } <span class="k">from</span> <span class="s">'iframe-shield'</span>;
+
+<span class="k">const</span> shield = <span class="k">new</span> <span class="f">IframeShield</span>({
+  memoryBudgetMB: <span class="n">500</span>,
+  quality: <span class="s">'auto'</span>,
+  maxConcurrentActive: <span class="n">1</span>,
+});
+
+<span class="k">const</span> id = shield.<span class="f">register</span>(<span class="s">'#game-iframe'</span>, {
+  estimatedMemoryMB: <span class="n">700</span>,
+  priority: <span class="n">1</span>,
+});</pre>
+
+<p>The iframe will now be managed automatically:</p>
+<ul>
+  <li>Device capabilities detected &mdash; quality settings applied</li>
+  <li>Memory monitored continuously &mdash; quality degrades under pressure</li>
+  <li>Background tabs frozen &mdash; resumed on return</li>
+  <li>Crashes detected &mdash; auto-recovery at lower quality</li>
+</ul>
+
+<h2>React</h2>
+<pre><span class="k">import</span> { <span class="f">useIframeShield</span> } <span class="k">from</span> <span class="s">'iframe-shield/react'</span>;
+
+<span class="k">function</span> <span class="f">GamePlayer</span>({ gameUrl }) {
+  <span class="k">const</span> { iframeRef, stats, setQuality, freeze, resume } = <span class="f">useIframeShield</span>({
+    src: gameUrl,
+    enabled: !!gameUrl,
+    estimatedMemoryMB: <span class="n">700</span>,
+    config: {
+      deviceProfile: <span class="s">'auto'</span>,
+      quality: <span class="s">'auto'</span>,
+      crashRecovery: { enabled: <span class="n">true</span> },
+      debugger: {
+        enabled: process.env.NODE_ENV === <span class="s">'development'</span>,
+        position: <span class="s">'bottom-right'</span>,
+        shortcut: <span class="s">'ctrl+shift+q'</span>,
+      },
+    },
+  });
+
+  <span class="k">return</span> &lt;iframe ref={iframeRef} src={gameUrl} /&gt;;
+}</pre>
+
+<div class="tip"><strong>Tip:</strong> The <code>useIframeShield</code> hook shares a single IframeShield instance across all components. No need to manage singletons.</div>
+
+<h2>Manual Controls</h2>
+<p>Override auto-pilot when needed:</p>
+<pre><span class="c">// Change quality</span>
+shield.<span class="f">setQuality</span>(id, <span class="s">'low'</span>);
+
+<span class="c">// Freeze iframe (level 1-3)</span>
+shield.<span class="f">freeze</span>(id, <span class="n">1</span>);  <span class="c">// Light freeze, state preserved</span>
+shield.<span class="f">freeze</span>(id, <span class="n">3</span>);  <span class="c">// Full freeze, memory released</span>
+
+<span class="c">// Resume from any level</span>
+shield.<span class="f">resume</span>(id);
+
+<span class="c">// Get current state</span>
+<span class="k">const</span> stats = shield.<span class="f">getStats</span>();
+console.log(stats.memoryZone);  <span class="c">// 'green' | 'yellow' | 'red' | 'critical' | 'emergency'</span>
+
+<span class="c">// Cleanup</span>
+shield.<span class="f">dispose</span>();</pre>
+
+<h2>Next Steps</h2>
+<ul>
+  <li><a href="configuration.html">Full Configuration</a> &mdash; every option explained</li>
+  <li><a href="device-profiling.html">Device Profiling</a> &mdash; how auto-detection works</li>
+  <li><a href="memory-zones.html">Memory Zones</a> &mdash; the 5-zone response system</li>
+  <li><a href="game-proxy.html">Game Proxy</a> &mdash; advanced resource control</li>
+  <li><a href="api.html">API Reference</a> &mdash; all methods and types</li>
+</ul>
+
+</main>
+</div>
+</body>
+</html>

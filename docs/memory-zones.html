@@ -1,0 +1,24 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23d4a574'/%3E%3Cstop offset='100%25' stop-color='%23e0b88a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 5L85 20v30c0 22-15 38-35 45C30 88 15 72 15 50V20L50 5z' fill='url(%23g)'/%3E%3Cpath d='M50 25L35 55h10v20l15-30H50V25z' fill='%23111'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet"><link rel="stylesheet" href="docs.css"><title>Memory Zones | iframe-shield</title></head><body><div class="layout"><nav class="sidebar"><a href="index.html" class="sidebar-logo"><svg width="20" height="20" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d4a574"/><stop offset="100%" stop-color="#e0b88a"/></linearGradient></defs><path d="M50 5L85 20v30c0 22-15 38-35 45C30 88 15 72 15 50V20L50 5z" fill="url(#g)"/><path d="M50 25L35 55h10v20l15-30H50V25z" fill="#111"/></svg> iframe-shield</a><div class="sidebar-section"><div class="sidebar-title">Getting Started</div><a href="quick-start.html" class="nav-link">Quick Start</a><a href="configuration.html" class="nav-link">Configuration</a><a href="api.html" class="nav-link">API Reference</a></div><div class="sidebar-section"><div class="sidebar-title">Features</div><a href="device-profiling.html" class="nav-link">Device Profiling</a><a href="memory-zones.html" class="nav-link">Memory Zones</a><a href="game-proxy.html" class="nav-link">Game Proxy</a><a href="ios-safari.html" class="nav-link">iOS Safari</a><a href="crash-recovery.html" class="nav-link">Crash Recovery</a><a href="debug-overlay.html" class="nav-link">Debug Overlay</a></div><div class="sidebar-section"><div class="sidebar-title">Links</div><a href="https://github.com/nano-step/iframe-shield" class="nav-link">GitHub</a><a href="https://www.npmjs.com/package/iframe-shield" class="nav-link">npm</a></div></nav><main class="main">
+<h1>Memory Zones</h1>
+<p>Five graduated zones. Each triggers a proportional response to memory pressure.</p>
+<h2>Zone Thresholds</h2>
+<table><thead><tr><th>Zone</th><th>Default Threshold</th><th>Actions</th></tr></thead><tbody>
+<tr><td style="color:#4ade80"><strong>Green</strong></td><td>0 &ndash; 60%</td><td>Normal operation. Quality upgrades allowed.</td></tr>
+<tr><td style="color:#facc15"><strong>Yellow</strong></td><td>60 &ndash; 75%</td><td>Auto-downgrade quality. Block new high-quality loads.</td></tr>
+<tr><td style="color:#fb923c"><strong>Red</strong></td><td>75 &ndash; 85%</td><td>Freeze all non-visible iframes. Minimal quality.</td></tr>
+<tr><td style="color:#f87171"><strong>Critical</strong></td><td>85 &ndash; 95%</td><td>Single iframe active. All others frozen.</td></tr>
+<tr><td style="color:#dc2626"><strong>Emergency</strong></td><td>95%+</td><td>Destroy low-priority iframes. Force cleanup.</td></tr>
+</tbody></table>
+<h2>Custom Thresholds</h2>
+<pre><span class="k">new</span> <span class="f">IframeShield</span>({
+  watermark: {
+    greenMax: <span class="n">0.5</span>,    <span class="c">// Yellow starts at 50%</span>
+    yellowMax: <span class="n">0.65</span>,  <span class="c">// Red starts at 65%</span>
+    redMax: <span class="n">0.8</span>,      <span class="c">// Critical starts at 80%</span>
+    criticalMax: <span class="n">0.9</span>, <span class="c">// Emergency starts at 90%</span>
+  },
+});</pre>
+<h2>Reading the Zone</h2>
+<pre>shield.<span class="f">getMemoryZone</span>();    <span class="c">// 'green' | 'yellow' | 'red' | 'critical' | 'emergency'</span>
+shield.<span class="f">getStats</span>().memoryZone; <span class="c">// same</span></pre>
+</main></div></body></html>
